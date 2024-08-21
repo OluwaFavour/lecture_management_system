@@ -1,0 +1,8 @@
+venv/
+batch_add_students.py
+excel_extractor.py
+*.xlsx
+*.bat
+*.env
+__pycache__/
+migrations/
