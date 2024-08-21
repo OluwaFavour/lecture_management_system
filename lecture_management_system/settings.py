@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "channels",
     "rest_framework",
+    "corsheaders",
     "django_filters",
     "drf_spectacular",
     "drf_spectacular_sidecar",
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -203,3 +205,8 @@ SPECTACULAR_SETTINGS = {
     "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
     "REDOC_DIST": "SIDECAR",
 }
+
+# CORS Settings
+CORS_ALLOW_ALL_ORIGINS = True if config.get("CORS_ALLOWED_ORIGINS") is None else False
+CORS_ALLOWED_ORIGINS = config.get("CORS_ALLOWED_ORIGINS", "").split(",")
+CORS_ALLOW_CREDENTIALS = str_to_bool(config.get("CORS_ALLOW_CREDENTIALS", "False"))
