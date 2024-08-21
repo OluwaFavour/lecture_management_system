@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "courses",
     "notifications",
     "chat",
+    "alarm",
 ]
 
 MIDDLEWARE = [
