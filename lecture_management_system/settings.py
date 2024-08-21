@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-from dotenv import dotenv_values
+import os
+
+from dotenv import dotenv_values, load_dotenv
 from pathlib import Path
 
 
@@ -19,7 +21,7 @@ def str_to_bool(value):
 
 
 # Load environment variables from .env file
-config = dotenv_values(".env")
+load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,9 +34,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-)!&5ipf#fmjlpv_mo5pb9qb9+8vr#75ee-y+l$vwbd)=4ds%uj"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config.get("DEBUG", False)
+DEBUG = os.environ.get("DEBUG", False)
 
-ALLOWED_HOSTS = [config.get("ALLOWED_HOSTS", "*")]
+ALLOWED_HOSTS = [os.environ.get("ALLOWED_HOSTS", "*")]
 
 
 # Application definition
@@ -97,28 +99,32 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(config.get("REDIS_HOST"), int(config.get("REDIS_PORT", 10472)))],
+            "hosts": [
+                (os.environ.get("REDIS_HOST"), int(os.environ.get("REDIS_PORT", 10472)))
+            ],
         },
     },
 }
 
-if config.get("REDIS_PASSWORD"):
-    CHANNEL_LAYERS["default"]["CONFIG"]["password"] = config.get("REDIS_PASSWORD")
+if os.environ.get("REDIS_PASSWORD"):
+    CHANNEL_LAYERS["default"]["CONFIG"]["password"] = os.environ.get("REDIS_PASSWORD")
 
 # Session
 # https://docs.djangoproject.com/en/5.1/topics/http/sessions/
 
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_AGE = (
-    int(config.get("SESSION_COOKIE_AGE_DAYS", "7")) * 24 * 60 * 60
+    int(os.environ.get("SESSION_COOKIE_AGE_DAYS", "7")) * 24 * 60 * 60
 )  # 7 days
-SESSION_COOKIE_SECURE = str_to_bool(config.get("SESSION_COOKIE_SECURE", "False"))
-SESSION_COOKIE_SAMESITE = config.get("SESSION_COOKIE_SAMESITE", "Lax")  # Keep as string
-SESSION_COOKIE_HTTPONLY = str_to_bool(config.get("SESSION_COOKIE_HTTPONLY", "True"))
+SESSION_COOKIE_SECURE = str_to_bool(os.environ.get("SESSION_COOKIE_SECURE", "False"))
+SESSION_COOKIE_SAMESITE = os.environ.get(
+    "SESSION_COOKIE_SAMESITE", "Lax"
+)  # Keep as string
+SESSION_COOKIE_HTTPONLY = str_to_bool(os.environ.get("SESSION_COOKIE_HTTPONLY", "True"))
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-DATABASE_URL = config.get("DATABASE_URL")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 if DATABASE_URL:
     import dj_database_url
 
@@ -207,6 +213,8 @@ SPECTACULAR_SETTINGS = {
 }
 
 # CORS Settings
-CORS_ALLOW_ALL_ORIGINS = True if config.get("CORS_ALLOWED_ORIGINS") is None else False
-CORS_ALLOWED_ORIGINS = config.get("CORS_ALLOWED_ORIGINS", "").split(",")
-CORS_ALLOW_CREDENTIALS = str_to_bool(config.get("CORS_ALLOW_CREDENTIALS", "False"))
+CORS_ALLOW_ALL_ORIGINS = (
+    True if os.environ.get("CORS_ALLOWED_ORIGINS") is None else False
+)
+CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+CORS_ALLOW_CREDENTIALS = str_to_bool(os.environ.get("CORS_ALLOW_CREDENTIALS", "False"))
