@@ -12,7 +12,7 @@ class IsLecturer(BasePermission):
 class IsStudent(BasePermission):
     def has_permission(self, request, view):
         user, _ = SessionAuthentication().authenticate(request)
-        return user.is_student if user else False
+        return not user.is_lecturer if user else False
 
 
 class IsAdmin(BasePermission):

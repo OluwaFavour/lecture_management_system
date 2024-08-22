@@ -76,7 +76,7 @@ class SpecialCourse(Course):
     students = models.ManyToManyField(
         User,
         related_name="special_courses",
-        limit_choices_to={"is_student": True},
+        limit_choices_to={"is_lecturer": False},
     )
     base_course = models.OneToOneField(
         Course,

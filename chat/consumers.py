@@ -117,7 +117,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return User.objects.filter(id=id, is_lecturer=True).exists()
         elif role == "class_rep":
             return User.objects.filter(
-                id=id, is_student=True, is_class_rep=True
+                id=id, is_lecturer=False, is_class_rep=True
             ).exists()
         else:
             return User.objects.filter(id=id).exists()

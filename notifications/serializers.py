@@ -1,18 +1,7 @@
 from rest_framework import serializers
 
 from .models import Notification
-from authentication.serializers import UserSerializer
-
-
-class StudentSerializer(UserSerializer):
-    class Meta:
-        model = UserSerializer.Meta.model
-        fields = [
-            "matric_number",
-            "level",
-            "is_class_rep",
-            "is_student",
-        ]
+from authentication.serializers import StudentSerializer
 
 
 class NotificationSerializer(serializers.ModelSerializer):

@@ -1,12 +1,12 @@
 from rest_framework import serializers
 
 from .models import Course, DayOfWeek, Tag, SpecialCourse
-from authentication.serializers import UserSerializer
+from authentication.serializers import LecturerSerializer
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    lecturer = UserSerializer(read_only=True)
-    assistants = UserSerializer(read_only=True, many=True)
+    lecturer = LecturerSerializer(read_only=True)
+    assistants = LecturerSerializer(read_only=True, many=True)
 
     class Meta:
         model = Course

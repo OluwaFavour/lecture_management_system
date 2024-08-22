@@ -4,9 +4,9 @@ from .models import User, Session
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ["email", "matric_number", "level", "is_student", "is_lecturer"]
+    list_display = ["email", "matric_number", "level", "is_lecturer"]
     search_fields = ["email", "matric_number"]
-    list_filter = ["level", "is_student", "is_class_rep", "is_lecturer"]
+    list_filter = ["level", "is_class_rep", "is_lecturer"]
     ordering = ["email", "matric_number", "level"]
     readonly_fields = ["last_login", "date_joined"]
     fieldsets = (
@@ -15,7 +15,6 @@ class UserAdmin(admin.ModelAdmin):
             "Permissions",
             {
                 "fields": (
-                    "is_student",
                     "is_class_rep",
                     "is_lecturer",
                     "is_staff",
@@ -36,7 +35,6 @@ class UserAdmin(admin.ModelAdmin):
                     "level",
                     "password1",
                     "password2",
-                    "is_student",
                     "is_class_rep",
                     "is_lecturer",
                     "is_staff",

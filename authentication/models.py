@@ -19,7 +19,6 @@ class UserManager(BaseUserManager):
         **extra_fields,
     ) -> "User":
         is_lecturer = None
-        is_student = None
         if not email and not matric_number:
             raise ValueError("The Email or Matric Number is required")
         if email and matric_number:
@@ -36,13 +35,12 @@ class UserManager(BaseUserManager):
         elif matric_number:
             if not level:
                 raise ValueError("The Level is required")
-            is_student = extra_fields.pop("is_student", True)
+            is_lecturer = False
         user: "User" = self.model(
             email=email,
             matric_number=matric_number,
             level=level,
-            is_lecturer=is_lecturer or False,
-            is_student=is_student or False,
+            is_lecturer=is_lecturer,
             **extra_fields,
         )
         user.set_password(password)
@@ -96,7 +94,6 @@ class User(AbstractBaseUser):
         choices=Level.choices,
     )
     is_lecturer = models.BooleanField(default=False)
-    is_student = models.BooleanField(default=False)
     is_class_rep = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -125,11 +122,6 @@ class User(AbstractBaseUser):
             self.matric_number = None
         elif self.matric_number:
             self.email = None
-
-        if self.is_student:
-            self.is_lecturer = False
-        if self.is_lecturer:
-            self.is_student = False
         return super().save(*args, **kwargs)
 
 

@@ -20,7 +20,7 @@ class Notification(models.Model):
         User,
         related_name="read_notifications",
         blank=True,
-        limit_choices_to={"is_student": True},
+        limit_choices_to={"is_lecturer": False},
     )
 
     def __str__(self):
@@ -28,7 +28,7 @@ class Notification(models.Model):
 
     @property
     def recipients(self):
-        return User.objects.filter(is_student=True, level=self.creator.level)
+        return User.objects.filter(is_lecturer=False, level=self.creator.level)
 
     @property
     def is_read(self):

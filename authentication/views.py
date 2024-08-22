@@ -3,7 +3,11 @@ import uuid
 from django.contrib.auth import authenticate, login, logout
 
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiExample,
+    PolymorphicProxySerializer,
+)
 
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
@@ -11,28 +15,34 @@ from rest_framework.response import Response
 
 from .models import Session, User
 from .permissions import IsLecturer, IsClassRep
-from .serializers import LoginSerializer, UserSerializer
+from .serializers import (
+    LoginSerializer,
+    StudentSerializer,
+    LecturerSerializer,
+)
 
 
+@extend_schema(tags=["auth"])
 class AuthViewSet(viewsets.GenericViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get_serializer_class(self):
         if self.action == "login":
             return LoginSerializer
-        if self.action == "register":
-            return UserSerializer
+        if self.action == "register_lecturer":
+            return LecturerSerializer
+        if self.action == "register_student":
+            return StudentSerializer
         return super().get_serializer_class()
 
     def get_permissions(self):
-        if self.action in ["login", "register"]:
-            return [permissions.AllowAny()]
+        if self.action == "logout":
+            return [permissions.IsAuthenticated]
         return super().get_permissions()
 
     @extend_schema(
         request=LoginSerializer,
         responses={status.HTTP_200_OK: LoginSerializer},
-        tags=["auth"],
     )
     @action(detail=False, methods=["POST"])
     def login(self, request):
@@ -74,7 +84,6 @@ class AuthViewSet(viewsets.GenericViewSet):
     @extend_schema(
         request=OpenApiTypes.NONE,
         responses={status.HTTP_204_NO_CONTENT: OpenApiTypes.NONE},
-        tags=["auth"],
     )
     @action(detail=False, methods=["POST"])
     def logout(self, request):
@@ -93,14 +102,27 @@ class AuthViewSet(viewsets.GenericViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(
-        request=UserSerializer,
-        responses={status.HTTP_201_CREATED: UserSerializer},
-        tags=["auth"],
+        request=LecturerSerializer,
+        responses={status.HTTP_201_CREATED: LecturerSerializer},
     )
     @action(detail=False, methods=["POST"])
-    def register(self, request):
+    def register_lecturer(self, request):
         """
-        Register a new user.
+        Register a new lecturer.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        request=StudentSerializer,
+        responses={status.HTTP_201_CREATED: StudentSerializer},
+    )
+    @action(detail=False, methods=["POST"])
+    def register_student(self, request):
+        """
+        Register a new student.
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -111,7 +133,6 @@ class AuthViewSet(viewsets.GenericViewSet):
 @extend_schema(tags=["users"])
 class UserViewSet(viewsets.GenericViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_permissions(self):
@@ -121,9 +142,22 @@ class UserViewSet(viewsets.GenericViewSet):
             return [IsLecturer]
         return super().get_permissions()
 
+    def get_serializer_class(self):
+        if self.action in ["get_all_lecturers", "get_lecturer"]:
+            return LecturerSerializer
+        if self.action in ["get_all_classreps", "get_class_rep"]:
+            return StudentSerializer
+        return super().get_serializer_class()
+
     @extend_schema(
         request=OpenApiTypes.NONE,
-        responses={status.HTTP_200_OK: UserSerializer},
+        responses={
+            status.HTTP_200_OK: PolymorphicProxySerializer(
+                component_name="MetaUser",
+                serializers=[StudentSerializer, LecturerSerializer],
+                resource_type_field_name="is_lecturer",
+            ),
+        },
     )
     @action(detail=False, methods=["GET"])
     def me(self, request):
@@ -131,7 +165,10 @@ class UserViewSet(viewsets.GenericViewSet):
         Retrieve the current user.
         """
         user = request.user
-        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+        if user.is_lecturer:
+            return Response(LecturerSerializer(user).data, status=status.HTTP_200_OK)
+        else:
+            return Response(StudentSerializer(user).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["GET"])
     def get_all_lecturers(self, request):
@@ -147,14 +184,14 @@ class UserViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=["GET"])
     def get_all_classreps(self, request):
-        students = self.get_queryset().filter(is_student=True, is_class_rep=True)
+        students = self.get_queryset().filter(is_lecturer=False, is_class_rep=True)
         serializer = self.get_serializer(data=students, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["GET"], url_path="get_student/(?P<class_rep_id>\d+)")
     def get_class_rep(self, request, class_rep_id=None):
         student = self.get_queryset().filter(
-            pk=class_rep_id, is_student=True, is_class_rep=True
+            pk=class_rep_id, is_lecturer=False, is_class_rep=True
         )
         serializer = self.get_serializer(data=student)
         return Response(serializer.data, status=status.HTTP_200_OK)
