@@ -65,6 +65,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -187,6 +188,11 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+if not DEBUG:
+    STATIC_ROOT = BASE_DIR / "staticfiles"
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -217,9 +223,6 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API for managing lectures and courses",
     "VERSION": "0.0.1",
     "SERVE_INCLUDE_SCHEMA": False,
-    "SWAGGER_UI_DIST": "SIDECAR",  # shorthand to use the sidecar instead
-    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
-    "REDOC_DIST": "SIDECAR",
 }
 
 # CORS Settings
