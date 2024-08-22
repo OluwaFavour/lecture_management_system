@@ -184,14 +184,14 @@ class UserViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=["GET"])
     def get_all_classreps(self, request):
-        students = self.get_queryset().filter(is_lecturer=False, is_class_rep=True)
-        serializer = self.get_serializer(data=students, many=True)
+        class_reps = self.get_queryset().filter(is_lecturer=False, is_class_rep=True)
+        serializer = self.get_serializer(data=class_reps, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["GET"], url_path="get_student/(?P<class_rep_id>\d+)")
     def get_class_rep(self, request, class_rep_id=None):
-        student = self.get_queryset().filter(
+        class_rep = self.get_queryset().filter(
             pk=class_rep_id, is_lecturer=False, is_class_rep=True
         )
-        serializer = self.get_serializer(data=student)
+        serializer = self.get_serializer(data=class_rep)
         return Response(serializer.data, status=status.HTTP_200_OK)
