@@ -26,6 +26,7 @@ from drf_spectacular.views import (
 
 from rest_framework import routers
 
+from .views import APIRootView
 from authentication import views as auth_views
 from courses import views as course_views
 from notifications import views as notification_views
@@ -39,6 +40,7 @@ router.register(
 )
 
 urlpatterns = [
+    path("", APIRootView.as_view(), name="api-root"),
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     # YOUR PATTERNS
