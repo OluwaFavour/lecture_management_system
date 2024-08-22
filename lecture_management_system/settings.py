@@ -216,5 +216,7 @@ SPECTACULAR_SETTINGS = {
 CORS_ALLOW_ALL_ORIGINS = (
     True if os.environ.get("CORS_ALLOWED_ORIGINS") is None else False
 )
-CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+CORS_ALLOWED_ORIGINS = os.environ.get(
+    "CORS_ALLOWED_ORIGINS", "http://localhost:8000"
+).split(",")
 CORS_ALLOW_CREDENTIALS = str_to_bool(os.environ.get("CORS_ALLOW_CREDENTIALS", "False"))
