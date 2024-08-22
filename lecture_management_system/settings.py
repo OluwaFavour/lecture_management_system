@@ -132,6 +132,7 @@ CSRF_COOKIE_SECURE = str_to_bool(os.environ.get("CSRF_COOKIE_SECURE", "False"))
 # SSL
 # https://docs.djangoproject.com/en/5.1/ref/settings/#std:setting-SECURE_SSL_REDIRECT
 SECURE_SSL_REDIRECT = str_to_bool(os.environ.get("SECURE_SSL_REDIRECT", "False"))
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -223,6 +224,9 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API for managing lectures and courses",
     "VERSION": "0.0.1",
     "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_DIST": "SIDECAR",  # shorthand to use the sidecar instead
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
 }
 
 # CORS Settings
