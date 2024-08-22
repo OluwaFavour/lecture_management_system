@@ -31,7 +31,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-)!&5ipf#fmjlpv_mo5pb9qb9+8vr#75ee-y+l$vwbd)=4ds%uj"
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY", "django-insecure-)!&5ipf#fmjlpv_mo5pb9qb9+8vr#75ee-y+l$vwbd)=4ds%uj"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", False)
@@ -121,6 +123,14 @@ SESSION_COOKIE_SAMESITE = os.environ.get(
     "SESSION_COOKIE_SAMESITE", "Lax"
 )  # Keep as string
 SESSION_COOKIE_HTTPONLY = str_to_bool(os.environ.get("SESSION_COOKIE_HTTPONLY", "True"))
+
+# CSRF
+# https://docs.djangoproject.com/en/5.1/ref/csrf/
+CSRF_COOKIE_SECURE = str_to_bool(os.environ.get("CSRF_COOKIE_SECURE", "False"))
+
+# SSL
+# https://docs.djangoproject.com/en/5.1/ref/settings/#std:setting-SECURE_SSL_REDIRECT
+SECURE_SSL_REDIRECT = str_to_bool(os.environ.get("SECURE_SSL_REDIRECT", "False"))
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
