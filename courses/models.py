@@ -90,3 +90,6 @@ class SpecialCourse(Course):
         ordering = ["name", "code", "level", "day", "start_time"]
         verbose_name = "Special Course"
         verbose_name_plural = "Special Courses"
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"

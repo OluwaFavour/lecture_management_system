@@ -1,7 +1,5 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import (
-    MinValueValidator,
-    MaxValueValidator,
     RegexValidator,
     EmailValidator,
 )
@@ -122,7 +120,7 @@ class User(AbstractBaseUser):
             self.matric_number = None
         elif self.matric_number:
             self.email = None
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 
 class Session(models.Model):
