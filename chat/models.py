@@ -12,13 +12,13 @@ class Message(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name="sent_messages",
-        limit_choices_to=Q(is_lecturer=True) | Q(is_classrep=True),
+        limit_choices_to=Q(is_lecturer=True) | Q(is_class_rep=True),
     )
     recipient = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="received_messages",
-        limit_choices_to=Q(is_lecturer=True) | Q(is_classrep=True),
+        limit_choices_to=Q(is_lecturer=True) | Q(is_class_rep=True),
     )
     text = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)

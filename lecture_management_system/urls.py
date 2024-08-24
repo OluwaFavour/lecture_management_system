@@ -16,6 +16,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
+from django.conf import settings
 from django.urls import path, include
 
 from drf_spectacular.views import (
@@ -27,7 +28,9 @@ from drf_spectacular.views import (
 from rest_framework import routers
 
 from .views import APIRootView
+from alarm import views as alarm_views
 from authentication import views as auth_views
+from chat import views as chat_views
 from courses import views as course_views
 from notifications import views as notification_views
 
@@ -38,6 +41,15 @@ router.register(r"courses", course_views.CourseViewSet, basename="courses")
 router.register(
     r"notifications", notification_views.NotificationViewSet, basename="notifications"
 )
+router.register(r"alerts", alarm_views.AlertViewSet, basename="alerts")
+router.register(
+    r"alert-settings", alarm_views.AlertSettingsViewSet, basename="alert-settings"
+)
+router.register(r"chat", chat_views.ChatViewSet, basename="chat")
+
+admin.site.site_header = settings.ADMIN_SITE_HEADER
+admin.site.site_title = settings.ADMIN_SITE_TITLE
+admin.site.index_title = settings.ADMIN_INDEX_TITLE
 
 urlpatterns = [
     path("", APIRootView.as_view(), name="api-root"),

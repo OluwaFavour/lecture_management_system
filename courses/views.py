@@ -1,6 +1,11 @@
 from typing import Any
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiParameter
+from drf_spectacular.utils import (
+    extend_schema,
+    inline_serializer,
+    OpenApiParameter,
+    extend_schema_view,
+)
 
 from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
@@ -20,6 +25,32 @@ from .serializers import (
 
 
 # Create your views here.
+@extend_schema_view(
+    list=extend_schema(
+        summary="Lists all courses in the database",
+        description="Lists all courses in the database. This action can only be performed by a lecturer or an admin",
+    ),
+    retrieve=extend_schema(
+        summary="Retrieve a course by its ID",
+        description="Retrieve a course by its ID. This action can only be performed by a lecturer or an admin",
+    ),
+    create=extend_schema(
+        summary="Create a course",
+        description="Create a course. This action can only be performed by a lecturer or an admin",
+    ),
+    update=extend_schema(
+        summary="Update a course",
+        description="Update a course. This action can only be performed by a lecturer or an admin",
+    ),
+    partial_update=extend_schema(
+        summary="Partially update a course",
+        description="Partially update a course. This action can only be performed by a lecturer or an admin",
+    ),
+    destroy=extend_schema(
+        summary="Delete a course",
+        description="Delete a course. This action can only be performed by a lecturer or an admin",
+    ),
+)
 @extend_schema(tags=["courses"])
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
@@ -27,9 +58,9 @@ class CourseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
-        if self.action in ["list", "retrieve"]:
-            return [AllowAny]
         if self.action in [
+            "list",
+            "retrieve",
             "create",
             "update",
             "partial_update",
@@ -40,6 +71,8 @@ class CourseViewSet(viewsets.ModelViewSet):
             return [IsLecturer, IsAdmin]
         if self.action in ["get_my_courses_for_the_week", "tag"]:
             return [IsStudent]
+        if self.action == "get_courses_by_level":
+            return [IsLecturer, IsAdmin, IsStudent]
         return super().get_permissions()
 
     def get_serializer_class(self):
@@ -66,6 +99,8 @@ class CourseViewSet(viewsets.ModelViewSet):
                 "AssistantUpdate404", {"error": serializers.CharField()}
             ),
         },
+        summary="Add an assistant to a course",
+        description="Add an assistant to a course. Can only be done by a lecturer or admin.",
     )
     @action(detail=True, methods=["POST"])
     def add_assistant(self, request, pk=None):
@@ -94,6 +129,8 @@ class CourseViewSet(viewsets.ModelViewSet):
                 "AssistantDelete404", {"error": serializers.CharField()}
             ),
         },
+        summary="Remove an assistant from a course",
+        description="Remove an assistant from a course. Can only be done by a lecturer or admin.",
     )
     @action(detail=True, methods=["DELETE"])
     def remove_assistant(self, request, pk=None):
@@ -112,7 +149,10 @@ class CourseViewSet(viewsets.ModelViewSet):
             {"message": "Assistant removed successfully"}, status=status.HTTP_200_OK
         )
 
-    @extend_schema(description="Get the courses for the current week")
+    @extend_schema(
+        description="Get the courses for the current week",
+        summary="Get courses for the week for the logged in student",
+    )
     @action(detail=False, methods=["GET"])
     def get_my_courses_for_the_week(self, request):
         """
@@ -143,6 +183,7 @@ class CourseViewSet(viewsets.ModelViewSet):
             )
         ],
         request=OpenApiTypes.NONE,
+        summary="Tag a course as special - carry over or spill over. Client can decide to display spill over courses or remove carry over courses in students courses and schedule",
     )
     @action(detail=True, methods=["POST"])
     def tag(self, request, pk=None):
@@ -179,6 +220,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     @extend_schema(
         description="Get courses by level",
+        summary="Get courses by level. The client can use this to get all courses done by a student using their level",
         parameters=[
             OpenApiParameter(
                 name="level",

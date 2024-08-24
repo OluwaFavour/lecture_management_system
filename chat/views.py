@@ -1,4 +1,5 @@
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
@@ -24,6 +25,25 @@ class ChatViewSet(viewsets.GenericViewSet):
             return [permissions.AllowAny()]
         return super().get_permissions()
 
+    @extend_schema(
+        summary="Get previous messages between a lecturer and a class rep",
+        description="Get previous messages between a lecturer and a class rep",
+        parameters=[
+            OpenApiParameter(
+                name="lecturer_id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="The ID of the lecturer",
+            ),
+            OpenApiParameter(
+                name="class_rep_id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="The ID of the class rep",
+            ),
+        ],
+        responses={200: PreviousMessagesSerializer},
+    )
     @action(
         detail=False,
         methods=["GET"],
@@ -37,7 +57,7 @@ class ChatViewSet(viewsets.GenericViewSet):
             )
 
         sender_id = request.user.id
-        recipient_id = lecturer_id if request.user.is_classrep else class_rep_id
+        recipient_id = lecturer_id if request.user.is_class_rep else class_rep_id
 
         if sender_id not in [lecturer_id, class_rep_id]:
             return Response(
@@ -71,19 +91,30 @@ class ChatViewSet(viewsets.GenericViewSet):
                 name="lecturer_id",
                 description="The ID of the lecturer",
                 required=True,
-                type=str,
+                type=int,
+                location=OpenApiParameter.PATH,
             ),
             OpenApiParameter(
                 name="class_rep_id",
                 description="The ID of the class rep",
                 required=True,
-                type=str,
+                type=int,
+                location=OpenApiParameter.PATH,
             ),
         ],
-        responses={
-            "101": "Switching Protocols (Successful WebSocket connection)",
-            "400": "Invalid room name or connection error",
-        },
+        responses={101: OpenApiTypes.STR, 400: OpenApiTypes.STR},
+        examples=[
+            OpenApiExample(
+                "Successful connection",
+                value="Switching Protocols (Successful WebSocket connection)",
+                status_codes=[101],
+            ),
+            OpenApiExample(
+                "Failed connection",
+                value="Bad Request (Invalid WebSocket connection)",
+                status_codes=[400],
+            ),
+        ],
     )
     @action(detail=False, methods=["GET"])
     def websocket_info(self, request):

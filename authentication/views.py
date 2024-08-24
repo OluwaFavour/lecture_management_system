@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     extend_schema,
-    OpenApiExample,
+    OpenApiParameter,
     PolymorphicProxySerializer,
 )
 
@@ -43,6 +43,8 @@ class AuthViewSet(viewsets.GenericViewSet):
     @extend_schema(
         request=LoginSerializer,
         responses={status.HTTP_200_OK: LoginSerializer},
+        summary="Login a user and create a new session for the user.",
+        description="Login a user and create a new session for the user.",
     )
     @action(detail=False, methods=["POST"])
     def login(self, request):
@@ -84,6 +86,8 @@ class AuthViewSet(viewsets.GenericViewSet):
     @extend_schema(
         request=OpenApiTypes.NONE,
         responses={status.HTTP_204_NO_CONTENT: OpenApiTypes.NONE},
+        summary="Logout a user and invalidate the current session.",
+        description="Logout a user and invalidate the current session.",
     )
     @action(detail=False, methods=["POST"])
     def logout(self, request):
@@ -104,6 +108,8 @@ class AuthViewSet(viewsets.GenericViewSet):
     @extend_schema(
         request=LecturerSerializer,
         responses={status.HTTP_201_CREATED: LecturerSerializer},
+        summary="Register a new lecturer.",
+        description="Register a new lecturer. Lecturers are users who are responsible for teaching and managing courses.",
     )
     @action(detail=False, methods=["POST"])
     def register_lecturer(self, request):
@@ -118,6 +124,8 @@ class AuthViewSet(viewsets.GenericViewSet):
     @extend_schema(
         request=StudentSerializer,
         responses={status.HTTP_201_CREATED: StudentSerializer},
+        summary="Register a new student.",
+        description="Register a new student. Students are users who are enrolled in courses.",
     )
     @action(detail=False, methods=["POST"])
     def register_student(self, request):
@@ -158,6 +166,8 @@ class UserViewSet(viewsets.GenericViewSet):
                 resource_type_field_name="is_lecturer",
             ),
         },
+        summary="Retrieve the current user.",
+        description="Retrieve the current user.",
     )
     @action(detail=False, methods=["GET"])
     def me(self, request):
@@ -170,24 +180,54 @@ class UserViewSet(viewsets.GenericViewSet):
         else:
             return Response(StudentSerializer(user).data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        summary="Retrieve all lecturers.",
+        description="Retrieve all lecturers. Lecturers are users who are responsible for teaching and managing courses.",
+    )
     @action(detail=False, methods=["GET"])
     def get_all_lecturers(self, request):
         lecturers = self.get_queryset().filter(is_lecturer=True)
         serializer = self.get_serializer(data=lecturers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        summary="Retrieve a lecturer.",
+        description="Retrieve a lecturer. Lecturers are users who are responsible for teaching and managing courses.",
+        parameters=[
+            OpenApiParameter(
+                name="lecturer_id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+            )
+        ],
+    )
     @action(detail=False, methods=["GET"], url_path="get_lecturer/(?P<lecturer_id>\d+)")
-    def get_lecturer(self, request, lecturer_id=None):
+    def get_lecturer(self, request, lecturer_id: int = None):
         lecturer = self.get_queryset().filter(pk=lecturer_id, is_lecturer=True)
         serializer = self.get_serializer(data=lecturer)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        summary="Retrieve all class representatives.",
+        description="Retrieve all class representatives. Class representatives are students who are responsible for representing their class.",
+    )
     @action(detail=False, methods=["GET"])
     def get_all_classreps(self, request):
         class_reps = self.get_queryset().filter(is_lecturer=False, is_class_rep=True)
         serializer = self.get_serializer(data=class_reps, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        summary="Retrieve a class representative.",
+        description="Retrieve a class representative. Class representatives are students who are responsible for representing their class.",
+        parameters=[
+            OpenApiParameter(
+                name="class_rep_id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+            )
+        ],
+    )
     @action(detail=False, methods=["GET"], url_path="get_student/(?P<class_rep_id>\d+)")
     def get_class_rep(self, request, class_rep_id=None):
         class_rep = self.get_queryset().filter(

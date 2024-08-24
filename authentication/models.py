@@ -48,14 +48,14 @@ class UserManager(BaseUserManager):
     def create_superuser(
         self,
         email: str | None = None,
-        matric_number: str | None = None,
         password: str | None = None,
         **extra_fields,
     ) -> "User":
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+
         return self.create_user(
-            email, matric_number, level=None, password=password, **extra_fields
+            email, None, level=None, password=password, **extra_fields
         )
 
 
@@ -103,8 +103,8 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     EMAIL_FIELD = "email"
-    USERNAME_FIELD = "matric_number"
-    REQUIRED_FIELDS = ["email", "level"]
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["matric_number", "level"]
 
     def __str__(self) -> str:
         return self.email if self.email else self.matric_number

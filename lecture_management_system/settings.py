@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "drf_spectacular_sidecar",
     "authentication",
+    "django_celery_beat",
     "courses",
     "notifications",
     "chat",
@@ -247,3 +248,19 @@ FROM_EMAIL = os.environ.get("FROM_EMAIL")
 # EMAIL_USE_SSL = str_to_bool(os.environ.get("EMAIL_USE_SSL", "False"))
 # EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 # EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+
+# Celery Settings
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get(
+    "CELERY_RESULT_BACKEND", "redis://localhost:6379/0"
+)
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+# Admin Settings
+ADMIN_SITE_HEADER = "Lecture Management System Administration"
+ADMIN_SITE_TITLE = "Lecture Management System"
+ADMIN_INDEX_TITLE = "Welcome to Lecture Management System Admin"
+
+# Admin Credentials
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")

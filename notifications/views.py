@@ -1,5 +1,5 @@
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, inline_serializer
+from drf_spectacular.utils import extend_schema, inline_serializer, extend_schema_view
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -13,6 +13,40 @@ from .serializers import NotificationSerializer
 
 
 # Create your views here.
+@extend_schema_view(
+    list=extend_schema(
+        summary="List all notifications. This action can only be performed by a student.",
+        description="This endpoint returns all notifications that are related to the student's level.",
+    ),
+    retrieve=extend_schema(
+        summary="Retrieve a notification. This action can only be performed by a student.",
+        description="This endpoint returns a single notification that is related to the student's level.",
+    ),
+    create=extend_schema(
+        summary="Create a notification. This action can only be performed by a class rep",
+        description="This endpoint allows class reps to create notifications.",
+    ),
+    update=extend_schema(
+        summary="Update a notification. This action can only be performed by a class rep",
+        description="This endpoint allows class reps to update notifications.",
+    ),
+    partial_update=extend_schema(
+        summary="Partial update a notification. This action can only be performed by a class rep",
+        description="This endpoint allows class reps to partial update notifications.",
+    ),
+    destroy=extend_schema(
+        summary="Delete a notification. This action can only be performed by a class rep",
+        description="This endpoint allows class reps to delete notifications.",
+    ),
+    mark_as_read=extend_schema(
+        summary="Mark a notification as read. This action can only be performed by a student.",
+        description="This endpoint allows students to mark notifications as read.",
+    ),
+    is_read_by_student=extend_schema(
+        summary="Check if a notification is read by a student. This action can only be performed by a student.",
+        description="This endpoint allows students to check if a notification is read by them.",
+    ),
+)
 @extend_schema(tags=["notifications"])
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()

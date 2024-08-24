@@ -4,5 +4,11 @@ excel_extractor.py
 *.xlsx
 *.bat
 *.env
+*.bak
+*.dat
+*.dir
 __pycache__/
 migrations/
+.dockerignore
+Dockerfile
+compose.yaml
