@@ -205,7 +205,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Custom User Model
 # https://docs.djangoproject.com/en/5.1/topics/auth/customizing/#using-a-custom-user-model-when-starting-a-project
+
 AUTH_USER_MODEL = "authentication.User"
+
+AUTHENTICATION_BACKENDS = ["authentication.backends.UserModelBackend"]
 
 # REST Framework
 # https://www.django-rest-framework.org/api-guide/settings/

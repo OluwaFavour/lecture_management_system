@@ -1,7 +1,7 @@
 from typing import Any
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth import get_user_model
-from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import AbstractUser
 from django.http import HttpRequest
 
 from .models import User
@@ -15,7 +15,7 @@ class UserModelBackend(BaseBackend):
         username: str | None = ...,
         password: str | None = ...,
         **kwargs: Any
-    ) -> AbstractBaseUser | None:
+    ) -> AbstractUser | None:
         UserModel = get_user_model()
         if username is None:
             username = kwargs.get(UserModel.USERNAME_FIELD)
@@ -40,12 +40,12 @@ class UserModelBackend(BaseBackend):
         UserModel().set_password(password)
         return
 
-    def get_user(self, user_id: int) -> "User" | None:
+    def get_user(self, user_id: int) -> AbstractUser | None:
         UserModel = get_user_model()
         try:
             return UserModel.objects.get(pk=user_id)
         except UserModel.DoesNotExist:
             return
 
-    def user_can_authenticate(self, user: "User") -> bool:
+    def user_can_authenticate(self, user: AbstractUser) -> bool:
         return user.is_active

@@ -1,11 +1,16 @@
 from typing import Any
 
-from rest_framework import serializers
-from django.contrib.auth import get_user_model, password_validation
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.validators import EmailValidator, RegexValidator
 
+from drf_spectacular.utils import extend_schema_field
+
+from rest_framework import serializers
+
 from .models import Session
+
+# from courses.serializers import get_course_serializer_class
 
 User = get_user_model()
 
@@ -39,6 +44,8 @@ class LoginSerializer(serializers.Serializer):
 
 class LecturerSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    lecturer_courses = serializers.SerializerMethodField()
+    assisted_courses = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -46,8 +53,26 @@ class LecturerSerializer(serializers.ModelSerializer):
             "password",
             "email",
             "is_lecturer",
+            "lecturer_courses",
+            "assisted_courses",
         ]
         read_only_fields = ["is_lecturer"]
+
+    def get_lecturer_courses(self, obj):
+        from courses.serializers import (
+            CourseSerializer,
+        )  # Import here to avoid circular import
+
+        courses = obj.lecturer_courses.all()
+        return CourseSerializer(courses, many=True).data
+
+    def get_assisted_courses(self, obj):
+        from courses.serializers import (
+            CourseSerializer,
+        )  # Import here to avoid circular import
+
+        courses = obj.assisted_courses.all()
+        return CourseSerializer(courses, many=True).data
 
     def validate_email(self, value: str) -> str:
         if User.objects.filter(email=value).exists():

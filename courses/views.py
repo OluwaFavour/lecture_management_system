@@ -68,11 +68,11 @@ class CourseViewSet(viewsets.ModelViewSet):
             "add_assistant",
             "remove_assistant",
         ]:
-            return [IsLecturer, IsAdmin]
+            return [IsLecturer(), IsAdmin()]
         if self.action in ["get_my_courses_for_the_week", "tag"]:
             return [IsStudent]
         if self.action == "get_courses_by_level":
-            return [IsLecturer, IsAdmin, IsStudent]
+            return [IsLecturer(), IsAdmin(), IsStudent()]
         return super().get_permissions()
 
     def get_serializer_class(self):

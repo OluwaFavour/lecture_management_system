@@ -37,7 +37,7 @@ class AuthViewSet(viewsets.GenericViewSet):
 
     def get_permissions(self):
         if self.action == "logout":
-            return [permissions.IsAuthenticated]
+            return [permissions.IsAuthenticated()]
         return super().get_permissions()
 
     @extend_schema(
@@ -145,9 +145,9 @@ class UserViewSet(viewsets.GenericViewSet):
 
     def get_permissions(self):
         if self.action in ["get_all_lecturers", "get_lecturer"]:
-            return [IsClassRep]
+            return [IsClassRep()]
         if self.action in ["get_all_classreps", "get_class_rep"]:
-            return [IsLecturer]
+            return [IsLecturer()]
         return super().get_permissions()
 
     def get_serializer_class(self):
