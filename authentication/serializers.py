@@ -53,10 +53,11 @@ class LecturerSerializer(serializers.ModelSerializer):
             "password",
             "email",
             "is_lecturer",
+            "is_registeration_officer",
             "lecturer_courses",
             "assisted_courses",
         ]
-        read_only_fields = ["is_lecturer"]
+        read_only_fields = ["is_lecturer", "is_registeration_officer"]
 
     def get_lecturer_courses(self, obj):
         from courses.serializers import (

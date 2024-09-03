@@ -13,9 +13,15 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from .models import Course, DayOfWeek, SpecialCourse, Tag, Level
-from authentication.permissions import IsLecturer, IsStudent, IsAdmin
+from authentication.permissions import (
+    IsLecturer,
+    IsStudent,
+    IsAdmin,
+    IsRegistrationOfficer,
+)
 from authentication.models import User
 from .serializers import (
+    CourseCreateSerializer,
     CourseSerializer,
     AssistantUpdateSerializer,
     CourseForTheWeekSerializer,
@@ -61,21 +67,21 @@ class CourseViewSet(viewsets.ModelViewSet):
         if self.action in [
             "list",
             "retrieve",
-            "create",
-            "update",
-            "partial_update",
-            "destroy",
             "add_assistant",
             "remove_assistant",
         ]:
-            return [IsLecturer(), IsAdmin()]
+            return [IsLecturer(), IsAdmin(), IsRegistrationOfficer()]
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsRegistrationOfficer(), IsAdmin()]
         if self.action in ["get_my_courses_for_the_week", "tag"]:
-            return [IsStudent]
+            return [IsStudent()]
         if self.action == "get_courses_by_level":
             return [IsLecturer(), IsAdmin(), IsStudent()]
         return super().get_permissions()
 
     def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return CourseCreateSerializer
         if self.action in ["add_assistant", "remove_assistant"]:
             return AssistantUpdateSerializer
         if self.action == "get_my_courses_for_the_week":

@@ -41,3 +41,13 @@ class IsClassRep(BasePermission):
         else:
             user = None
         return user.is_class_rep if user else False
+
+
+class IsRegistrationOfficer(BasePermission):
+    def has_permission(self, request, view):
+        auth_result = SessionAuthentication().authenticate(request)
+        if auth_result is not None:
+            user, _ = auth_result
+        else:
+            user = None
+        return user.is_registration_officer if user else False

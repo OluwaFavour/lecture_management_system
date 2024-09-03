@@ -13,6 +13,12 @@ class CourseSerializer(serializers.ModelSerializer):
         exclude = ["created_at", "updated_at"]
 
 
+class CourseCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        exclude = ["created_at", "updated_at"]
+
+
 class AssistantUpdateSerializer(serializers.Serializer):
     assistant = serializers.IntegerField()
 

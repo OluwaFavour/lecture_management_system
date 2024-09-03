@@ -93,6 +93,7 @@ class User(AbstractBaseUser):
     )
     is_lecturer = models.BooleanField(default=False)
     is_class_rep = models.BooleanField(default=False)
+    is_registration_officer = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
