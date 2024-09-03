@@ -129,6 +129,7 @@ SESSION_COOKIE_HTTPONLY = str_to_bool(os.environ.get("SESSION_COOKIE_HTTPONLY", 
 # CSRF
 # https://docs.djangoproject.com/en/5.1/ref/csrf/
 CSRF_COOKIE_SECURE = str_to_bool(os.environ.get("CSRF_COOKIE_SECURE", "False"))
+CSRF_COOKIE_SAMESITE = os.environ.get("CSRF_COOKIE_SAMESITE", "Lax")
 
 # SSL
 # https://docs.djangoproject.com/en/5.1/ref/settings/#std:setting-SECURE_SSL_REDIRECT
