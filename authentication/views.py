@@ -14,7 +14,7 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
 from .models import Session, User
-from .permissions import IsLecturer, IsClassRep
+from .permissions import IsLecturer, IsClassRep, IsRegistrationOfficer
 from .serializers import (
     LoginSerializer,
     StudentSerializer,
@@ -145,9 +145,9 @@ class UserViewSet(viewsets.GenericViewSet):
 
     def get_permissions(self):
         if self.action in ["get_all_lecturers", "get_lecturer"]:
-            return [IsClassRep()]
+            return [IsRegistrationOfficer()]
         if self.action in ["get_all_classreps", "get_class_rep"]:
-            return [IsLecturer()]
+            return [IsLecturer(), IsRegistrationOfficer()]
         return super().get_permissions()
 
     def get_serializer_class(self):
@@ -187,7 +187,7 @@ class UserViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=["GET"])
     def get_all_lecturers(self, request):
         lecturers = self.get_queryset().filter(is_lecturer=True)
-        serializer = self.get_serializer(data=lecturers, many=True)
+        serializer = self.get_serializer(lecturers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -205,6 +205,7 @@ class UserViewSet(viewsets.GenericViewSet):
     def get_lecturer(self, request, lecturer_id: int = None):
         lecturer = self.get_queryset().filter(pk=lecturer_id, is_lecturer=True)
         serializer = self.get_serializer(data=lecturer)
+        serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -214,7 +215,7 @@ class UserViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=["GET"])
     def get_all_classreps(self, request):
         class_reps = self.get_queryset().filter(is_lecturer=False, is_class_rep=True)
-        serializer = self.get_serializer(data=class_reps, many=True)
+        serializer = self.get_serializer(class_reps, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -234,4 +235,5 @@ class UserViewSet(viewsets.GenericViewSet):
             pk=class_rep_id, is_lecturer=False, is_class_rep=True
         )
         serializer = self.get_serializer(data=class_rep)
+        serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
