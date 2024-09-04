@@ -53,7 +53,7 @@ class LecturerSerializer(serializers.ModelSerializer):
             "password",
             "email",
             "is_lecturer",
-            "is_registeration_officer",
+            "is_registration_officer",
             "lecturer_courses",
             "assisted_courses",
         ]
