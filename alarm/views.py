@@ -5,6 +5,7 @@ from rest_framework import mixins, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from alarm.models import AlertSettings
 from authentication.permissions import IsStudent
 from .serializers import AlertSerializer, AlertSettingsSerializer, Alert
 
@@ -147,7 +148,7 @@ class AlertSettingsViewSet(viewsets.GenericViewSet):
     serializer_class = AlertSettingsSerializer
 
     def get_queryset(self):
-        return self.request.user.alert_settings.all()
+        return AlertSettings.objects.filter(student=self.request.user)
 
     def get_object(self):
         return self.get_queryset().first()

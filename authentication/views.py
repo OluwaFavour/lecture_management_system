@@ -145,7 +145,7 @@ class UserViewSet(viewsets.GenericViewSet):
 
     def get_permissions(self):
         if self.action in ["get_all_lecturers", "get_lecturer"]:
-            return [IsRegistrationOfficer()]
+            return [IsRegistrationOfficer(), IsLecturer()]
         if self.action in ["get_all_classreps", "get_class_rep"]:
             return [IsLecturer(), IsRegistrationOfficer()]
         return super().get_permissions()
