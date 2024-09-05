@@ -8,6 +8,8 @@ from drf_spectacular.utils import extend_schema_field
 
 from rest_framework import serializers
 
+from courses.models import Course
+
 from .models import Session
 
 # from courses.serializers import get_course_serializer_class
@@ -42,9 +44,17 @@ class LoginSerializer(serializers.Serializer):
                 )
 
 
+class CourseSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Course
+        exclude = ["created_at", "updated_at"]
+
+
 class LecturerSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    lecturer_courses = serializers.SerializerMethodField()
+    courses = serializers.SerializerMethodField()
     assisted_courses = serializers.SerializerMethodField()
 
     class Meta:
@@ -55,26 +65,18 @@ class LecturerSerializer(serializers.ModelSerializer):
             "email",
             "is_lecturer",
             "is_registration_officer",
-            "lecturer_courses",
+            "courses",
             "assisted_courses",
         ]
         read_only_fields = ["id", "is_lecturer", "is_registration_officer"]
 
-    def get_lecturer_courses(self, obj):
-        from courses.serializers import (
-            CourseSerializer,
-        )  # Import here to avoid circular import
+    @extend_schema_field(CourseSerializer(many=True))
+    def get_courses(self, obj) -> list[dict[str, Any]]:
+        return CourseSerializer(obj.lecturer_courses.all(), many=True).data
 
-        courses = obj.lecturer_courses.all()
-        return CourseSerializer(courses, many=True).data
-
-    def get_assisted_courses(self, obj):
-        from courses.serializers import (
-            CourseSerializer,
-        )  # Import here to avoid circular import
-
-        courses = obj.assisted_courses.all()
-        return CourseSerializer(courses, many=True).data
+    @extend_schema_field(CourseSerializer(many=True))
+    def get_assisted_courses(self, obj) -> list[dict[str, Any]]:
+        return CourseSerializer(obj.assisted_courses.all(), many=True).data
 
     def validate_email(self, value: str) -> str:
         if User.objects.filter(email=value).exists():

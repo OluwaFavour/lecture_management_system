@@ -4,10 +4,16 @@ from .models import Course, DayOfWeek, Tag, SpecialCourse
 from authentication.serializers import LecturerSerializer
 
 
+class CourseLecturerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LecturerSerializer.Meta.model
+        fields = ["id", "email", "is_lecturer", "is_registration_officer"]
+
+
 class CourseSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
-    lecturer = LecturerSerializer(read_only=True)
-    assistants = LecturerSerializer(read_only=True, many=True)
+    lecturer = CourseLecturerSerializer(read_only=True)
+    assistants = CourseLecturerSerializer(many=True, read_only=True)
 
     class Meta:
         model = Course
