@@ -5,6 +5,7 @@ from authentication.serializers import LecturerSerializer
 
 
 class CourseSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
     lecturer = LecturerSerializer(read_only=True)
     assistants = LecturerSerializer(read_only=True, many=True)
 

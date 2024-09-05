@@ -50,6 +50,7 @@ class LecturerSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            "id",
             "password",
             "email",
             "is_lecturer",
@@ -57,7 +58,7 @@ class LecturerSerializer(serializers.ModelSerializer):
             "lecturer_courses",
             "assisted_courses",
         ]
-        read_only_fields = ["is_lecturer", "is_registration_officer"]
+        read_only_fields = ["id", "is_lecturer", "is_registration_officer"]
 
     def get_lecturer_courses(self, obj):
         from courses.serializers import (
@@ -94,13 +95,14 @@ class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            "id",
             "password",
             "matric_number",
             "level",
             "is_lecturer",
             "is_class_rep",
         ]
-        read_only_fields = ["is_lecturer", "is_class_rep"]
+        read_only_fields = ["id", "is_lecturer", "is_class_rep"]
 
     def validate_matric_number(self, value: str) -> str:
         if User.objects.filter(matric_number=value).exists():
