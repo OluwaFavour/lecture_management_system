@@ -70,13 +70,13 @@ class CourseViewSet(viewsets.ModelViewSet):
             "add_assistant",
             "remove_assistant",
         ]:
-            return [IsLecturer(), IsAdmin(), IsRegistrationOfficer()]
+            self.permission_classes = [IsLecturer | IsAdmin | IsRegistrationOfficer]
         if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [IsRegistrationOfficer(), IsAdmin()]
+            self.permission_classes = [IsRegistrationOfficer | IsAdmin]
         if self.action in ["get_my_courses_for_the_week", "tag"]:
             return [IsStudent()]
         if self.action == "get_courses_by_level":
-            return [IsLecturer(), IsAdmin(), IsStudent()]
+            self.permission_classes = [IsLecturer | IsAdmin | IsStudent]
         return super().get_permissions()
 
     def get_serializer_class(self):
@@ -94,6 +94,18 @@ class CourseViewSet(viewsets.ModelViewSet):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
 
     @extend_schema(
         request=AssistantUpdateSerializer,

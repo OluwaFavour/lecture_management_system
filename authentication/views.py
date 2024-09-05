@@ -145,9 +145,9 @@ class UserViewSet(viewsets.GenericViewSet):
 
     def get_permissions(self):
         if self.action in ["get_all_lecturers", "get_lecturer"]:
-            return [IsRegistrationOfficer(), IsLecturer()]
+            self.permission_classes = [IsRegistrationOfficer | IsLecturer]
         if self.action in ["get_all_classreps", "get_class_rep"]:
-            return [IsLecturer(), IsRegistrationOfficer()]
+            self.permission_classes = [IsLecturer | IsRegistrationOfficer]
         return super().get_permissions()
 
     def get_serializer_class(self):
