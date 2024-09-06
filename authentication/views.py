@@ -1,6 +1,7 @@
 import uuid
 
 from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import get_object_or_404
 
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
@@ -203,9 +204,9 @@ class UserViewSet(viewsets.GenericViewSet):
     )
     @action(detail=False, methods=["GET"], url_path="get_lecturer/(?P<lecturer_id>\d+)")
     def get_lecturer(self, request, lecturer_id: int = None):
-        lecturer = self.get_queryset().filter(pk=lecturer_id, is_lecturer=True)
-        serializer = self.get_serializer(data=lecturer)
-        serializer.is_valid(raise_exception=True)
+        lecturers = self.get_queryset().filter(is_lecturer=True)
+        lecturer = get_object_or_404(lecturers, pk=lecturer_id)
+        serializer = self.get_serializer(lecturer)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -231,9 +232,7 @@ class UserViewSet(viewsets.GenericViewSet):
     )
     @action(detail=False, methods=["GET"], url_path="get_student/(?P<class_rep_id>\d+)")
     def get_class_rep(self, request, class_rep_id=None):
-        class_rep = self.get_queryset().filter(
-            pk=class_rep_id, is_lecturer=False, is_class_rep=True
-        )
-        serializer = self.get_serializer(data=class_rep)
-        serializer.is_valid(raise_exception=True)
+        class_reps = self.get_queryset().filter(is_lecturer=False, is_class_rep=True)
+        class_rep = get_object_or_404(class_reps, pk=class_rep_id)
+        serializer = self.get_serializer(class_rep)
         return Response(serializer.data, status=status.HTTP_200_OK)

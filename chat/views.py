@@ -85,18 +85,11 @@ class ChatViewSet(viewsets.GenericViewSet):
 
     @extend_schema(
         summary="WebSocket Chat Connection",
-        description="Connect to the WebSocket at ws://<domain>/ws/chat/{lecturer_id}/{class_rep_id}/",
+        description="Connect to the WebSocket at ws://<domain>/ws/chat/{other_user_id}/",
         parameters=[
             OpenApiParameter(
-                name="lecturer_id",
-                description="The ID of the lecturer",
-                required=True,
-                type=int,
-                location=OpenApiParameter.PATH,
-            ),
-            OpenApiParameter(
-                name="class_rep_id",
-                description="The ID of the class rep",
+                name="other_user_id",
+                description="The ID of the other user to chat with",
                 required=True,
                 type=int,
                 location=OpenApiParameter.PATH,

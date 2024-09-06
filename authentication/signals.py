@@ -10,7 +10,7 @@ def create_alert(sender, instance, **kwargs):
     from alarm.models import Alert, Course, AlertSettings
 
     # Create an alert setting for the user
-    alert_settings, created = AlertSettings.objects.get_or_create(user=instance)
+    alert_settings, created = AlertSettings.objects.get_or_create(student=instance)
     if created:
         alert_settings.save()
 

@@ -260,7 +260,8 @@ class CourseViewSet(viewsets.ModelViewSet):
                 {"error": "The level query parameter is required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if level not in Level.__members__.values():
+        level = int(level)
+        if level not in Level.values:
             return Response(
                 {"error": "Invalid level value"}, status=status.HTTP_400_BAD_REQUEST
             )

@@ -40,11 +40,11 @@ from .serializers import NotificationSerializer
     ),
     mark_as_read=extend_schema(
         summary="Mark a notification as read. This action can only be performed by a student.",
-        description="This endpoint allows students to mark notifications as read.",
+        description="This endpoint allows logged in students to mark notifications as read.",
     ),
     is_read_by_student=extend_schema(
         summary="Check if a notification is read by a student. This action can only be performed by a student.",
-        description="This endpoint allows students to check if a notification is read by them.",
+        description="This endpoint allows logged in students to check if a notification is read by them.",
     ),
 )
 @extend_schema(tags=["notifications"])
@@ -63,11 +63,8 @@ class NotificationViewSet(viewsets.ModelViewSet):
             return NotificationSerializer
         return super().get_serializer_class()
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset().filter(creator__level=request.user.level)
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        return super().get_queryset().filter(creator__level=self.request.user.level)
 
     @extend_schema(
         responses={status.HTTP_204_NO_CONTENT: OpenApiTypes.NONE},
@@ -76,7 +73,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["POST"])
     def mark_as_read(self, request, pk=None):
         notification: Notification = self.get_object()
-        notification.mark_as_read(request.user)
+        notification.mark_as_read(student=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(
@@ -91,6 +88,10 @@ class NotificationViewSet(viewsets.ModelViewSet):
     def is_read_by_student(self, request, pk=None):
         notification: Notification = self.get_object()
         return Response(
-            {"is_read_by_student": notification.is_read_by_student(request.user)},
+            {
+                "is_read_by_student": notification.is_read_by_student(
+                    student=request.user
+                )
+            },
             status=status.HTTP_200_OK,
         )

@@ -44,7 +44,7 @@ class LoginSerializer(serializers.Serializer):
                 )
 
 
-class CourseSerializer(serializers.ModelSerializer):
+class LecturerCourseSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -70,13 +70,13 @@ class LecturerSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "is_lecturer", "is_registration_officer"]
 
-    @extend_schema_field(CourseSerializer(many=True))
+    @extend_schema_field(LecturerCourseSerializer(many=True))
     def get_courses(self, obj) -> list[dict[str, Any]]:
-        return CourseSerializer(obj.lecturer_courses.all(), many=True).data
+        return LecturerCourseSerializer(obj.lecturer_courses.all(), many=True).data
 
-    @extend_schema_field(CourseSerializer(many=True))
+    @extend_schema_field(LecturerCourseSerializer(many=True))
     def get_assisted_courses(self, obj) -> list[dict[str, Any]]:
-        return CourseSerializer(obj.assisted_courses.all(), many=True).data
+        return LecturerCourseSerializer(obj.assisted_courses.all(), many=True).data
 
     def validate_email(self, value: str) -> str:
         if User.objects.filter(email=value).exists():

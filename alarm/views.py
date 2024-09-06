@@ -107,7 +107,6 @@ class AlertViewSet(
     serializer_class = AlertSerializer
 
     def get_queryset(self):
-        super().get_queryset()
         return self.request.user.alerts.all()
 
     def perform_create(self, serializer):
@@ -119,12 +118,14 @@ class AlertViewSet(
         if not instance.students.exists():
             instance.delete()
 
+    @extend_schema(request=OpenApiTypes.NONE)
     @action(detail=True, methods=["POST"])
     def activate(self, request, pk=None):
         alert: Alert = self.get_object()
         alert.activate()
         return Response(AlertSerializer(alert).data, status=status.HTTP_200_OK)
 
+    @extend_schema(request=OpenApiTypes.NONE)
     @action(detail=True, methods=["POST"])
     def deactivate(self, request, pk=None):
         alert: Alert = self.get_object()

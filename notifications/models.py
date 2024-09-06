@@ -38,11 +38,9 @@ class Notification(models.Model):
     def is_unread(self):
         return not self.is_read
 
-    @property
     def is_read_by_student(self, student):
         return self.read_by.filter(pk=student.pk).exists()
 
-    @property
     def is_unread_by_student(self, student):
         return not self.is_read_by_student(student)
 
