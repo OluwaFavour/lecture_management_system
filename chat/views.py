@@ -97,7 +97,6 @@ class ChatViewSet(viewsets.GenericViewSet):
     )
     @action(detail=False, methods=["GET"])
     def websocket_info(self, request):
-        # Dynamically generate WebSocket connection instructions
         return Response(
             {
                 "detail": "To connect to the WebSocket chat, use ws://<your-domain>/ws/chat/{other_user_id}/",
