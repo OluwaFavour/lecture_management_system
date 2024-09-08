@@ -8,8 +8,6 @@ from rest_framework.response import Response
 from .models import Message
 from .serializers import PreviousMessagesSerializer, PreviousMessages
 
-# Create your views here.
-
 
 @extend_schema(tags=["chat"])
 class ChatViewSet(viewsets.GenericViewSet):
@@ -27,43 +25,31 @@ class ChatViewSet(viewsets.GenericViewSet):
 
     @extend_schema(
         summary="Get previous messages between a lecturer and a class rep",
-        description="Get previous messages between a lecturer and a class rep",
+        description="Retrieve chat history between two users (lecturer and class rep)",
         parameters=[
             OpenApiParameter(
-                name="lecturer_id",
+                name="other_user_id",
                 type=OpenApiTypes.INT,
                 location=OpenApiParameter.PATH,
-                description="The ID of the lecturer",
-            ),
-            OpenApiParameter(
-                name="class_rep_id",
-                type=OpenApiTypes.INT,
-                location=OpenApiParameter.PATH,
-                description="The ID of the class rep",
-            ),
+                description="The ID of the recipient of the messages",
+            )
         ],
         responses={200: PreviousMessagesSerializer},
     )
     @action(
         detail=False,
         methods=["GET"],
-        url_path="(?P<lecturer_id>\d+)/(?P<class_rep_id>\d+)/previous-messages",
+        url_path="(?P<other_user_id>\d+)/previous-messages",
     )
-    def previous_messages(self, request, lecturer_id=None, class_rep_id=None):
-        if lecturer_id == class_rep_id:
+    def previous_messages(self, request, other_user_id=None):
+        if other_user_id is None:
             return Response(
-                {"error": "lecturer_id and class_rep_id cannot be the same"},
+                {"error": "The other_user_id parameter is required"},
                 status=400,
             )
 
         sender_id = request.user.id
-        recipient_id = lecturer_id if request.user.is_class_rep else class_rep_id
-
-        if sender_id not in [lecturer_id, class_rep_id]:
-            return Response(
-                {"error": "Invalid lecturer_id or class_rep_id"},
-                status=400,
-            )
+        recipient_id = other_user_id
 
         if sender_id == recipient_id:
             return Response(
@@ -81,7 +67,7 @@ class ChatViewSet(viewsets.GenericViewSet):
         serializer = PreviousMessagesSerializer(
             PreviousMessages(sent_messages, received_messages)
         )
-        return Response(serializer.data)
+        return Response(serializer.data, status=200)
 
     @extend_schema(
         summary="WebSocket Chat Connection",
@@ -111,8 +97,10 @@ class ChatViewSet(viewsets.GenericViewSet):
     )
     @action(detail=False, methods=["GET"])
     def websocket_info(self, request):
+        # Dynamically generate WebSocket connection instructions
         return Response(
             {
-                "detail": "This endpoint describes how to connect to the WebSocket for chat."
-            }
+                "detail": "To connect to the WebSocket chat, use ws://<your-domain>/ws/chat/{other_user_id}/",
+            },
+            status=200,
         )
