@@ -42,7 +42,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send_previous_messages()
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        if hasattr(self, "room_group_name"):
+            await self.channel_layer.group_discard(
+                self.room_group_name, self.channel_name
+            )
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
@@ -83,9 +86,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         )
 
-    async def send_previous_messages(self):
+    @database_sync_to_async
+    def send_previous_messages(self):
         """Send the previous chat messages between the users when the connection is established."""
-        messages: list[Message] = await self.get_previous_messages(
+        messages: list[Message] = self.get_previous_messages(
             self.user.id, self.other_user.id
         )
         message_list = [
@@ -97,12 +101,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
             for message in messages
         ]
-        await self.send(text_data=json.dumps(message_list))
+        self.send(text_data=json.dumps(message_list))
 
     @database_sync_to_async
     def get_user(self, user_id: int) -> User:
         """Fetch the user from the database."""
-        return User.objects.filter(pk=user_id).first()
+        return User.objects.get(pk=user_id)
 
     @database_sync_to_async
     def save_message(self, sender_id, recipient_id, text) -> Message:
@@ -110,7 +114,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         recipient = User.objects.get(pk=recipient_id)
         return Message.objects.create(sender=sender, recipient=recipient, text=text)
 
-    @database_sync_to_async
     def get_previous_messages(self, user1_id, user2_id):
         """Fetch previous messages between the two users."""
         return Message.objects.filter(

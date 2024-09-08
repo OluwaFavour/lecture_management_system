@@ -44,13 +44,13 @@ ALLOWED_HOSTS = [os.environ.get("ALLOWED_HOSTS", "*")]
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "channels",
     "rest_framework",
     "corsheaders",
     "django_filters",
@@ -99,19 +99,20 @@ ASGI_APPLICATION = "lecture_management_system.asgi.application"
 
 # Channels
 # https://channels.readthedocs.io/en/stable/
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [
-                (os.environ.get("REDIS_HOST"), int(os.environ.get("REDIS_PORT")))
-            ],
-        },
-    },
-}
+CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [
+#                 (os.environ.get("REDIS_HOST"), int(os.environ.get("REDIS_PORT")))
+#             ],
+#         },
+#     },
+# }
 
-if os.environ.get("REDIS_PASSWORD"):
-    CHANNEL_LAYERS["default"]["CONFIG"]["password"] = os.environ.get("REDIS_PASSWORD")
+# if os.environ.get("REDIS_PASSWORD"):
+#     CHANNEL_LAYERS["default"]["CONFIG"]["password"] = os.environ.get("REDIS_PASSWORD")
 
 # Session
 # https://docs.djangoproject.com/en/5.1/topics/http/sessions/

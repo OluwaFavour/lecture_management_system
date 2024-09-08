@@ -8,10 +8,11 @@ from drf_spectacular.utils import (
     extend_schema,
     OpenApiParameter,
     PolymorphicProxySerializer,
+    inline_serializer,
 )
 
-from rest_framework import viewsets, status, permissions
-from rest_framework.decorators import action, permission_classes
+from rest_framework import viewsets, status, permissions, serializers
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Session, User
@@ -146,7 +147,7 @@ class UserViewSet(viewsets.GenericViewSet):
 
     def get_permissions(self):
         if self.action in ["get_all_lecturers", "get_lecturer"]:
-            self.permission_classes = [IsRegistrationOfficer | IsLecturer]
+            self.permission_classes = [IsRegistrationOfficer | IsLecturer | IsClassRep]
         if self.action in ["get_all_classreps", "get_class_rep"]:
             self.permission_classes = [IsLecturer | IsRegistrationOfficer]
         return super().get_permissions()
@@ -180,6 +181,24 @@ class UserViewSet(viewsets.GenericViewSet):
             return Response(LecturerSerializer(user).data, status=status.HTTP_200_OK)
         else:
             return Response(StudentSerializer(user).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={
+            status.HTTP_200_OK: inline_serializer(
+                "SessionSerializer", fields={"session_token": serializers.CharField()}
+            )
+        },
+        summary="Get the session token for the current user.",
+        description="Get the session token for the current user.",
+    )
+    @action(detail=False, methods=["GET"])
+    def get_session_token(self, request):
+        """
+        Get the session token for the current user.
+        """
+        session = Session.objects.get(user=request.user, is_current=True)
+        return Response({"session_token": session.token}, status=status.HTTP_200_OK)
 
     @extend_schema(
         summary="Retrieve all lecturers.",

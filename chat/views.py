@@ -71,7 +71,7 @@ class ChatViewSet(viewsets.GenericViewSet):
 
     @extend_schema(
         summary="WebSocket Chat Connection",
-        description="Connect to the WebSocket at ws://<domain>/ws/chat/{other_user_id}/",
+        description="Connect to the WebSocket at ws://{domain}/ws/chat/{other_user_id}?session_token={session_token}",
         parameters=[
             OpenApiParameter(
                 name="other_user_id",
@@ -99,7 +99,7 @@ class ChatViewSet(viewsets.GenericViewSet):
     def websocket_info(self, request):
         return Response(
             {
-                "detail": "To connect to the WebSocket chat, use ws://{your-domain}/ws/chat/{other_user_id}/",
+                "detail": "To connect to the WebSocket chat, use ws://{your-domain}/ws/chat/{other_user_id}?session_token={session_token}",
             },
             status=200,
         )
