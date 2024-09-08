@@ -2,8 +2,12 @@ from rest_framework import serializers
 
 from .models import Alert, AlertSettings
 
+from courses.serializers import CourseSerializer
+
 
 class AlertSerializer(serializers.ModelSerializer):
+    event = CourseSerializer(read_only=True)
+
     class Meta:
         model = Alert
         exclude = ("students",)
