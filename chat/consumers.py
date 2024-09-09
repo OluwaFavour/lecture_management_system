@@ -19,15 +19,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if not self.user.is_authenticated or not (
             self.user.is_lecturer or self.user.is_class_rep
         ):
-            await self.close()
+            await self.close(code=4000, reason="Invalid user")
             return
 
         # Fetch the other user from the database using user_id
         self.other_user = await self.get_user(self.other_user_id)
+        if not self.other_user:
+            await self.close(code=4000, reason="Invalid other_user")
+            return
 
         # Ensure that the other user is either a lecturer or class rep, opposite to the current user
         if not self.is_valid_chat_participant():
-            await self.close()
+            await self.close(code=4000, reason="Invalid chat participant")
             return
 
         self.room_name = f"room_{min(self.user.id, self.other_user.id)}_{max(self.user.id, self.other_user.id)}"
@@ -39,13 +42,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         # Send previous messages
-        await self.send_previous_messages()
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {"type": "chat.previous_messages"},
+        )
 
     async def disconnect(self, close_code):
         if hasattr(self, "room_group_name"):
             await self.channel_layer.group_discard(
                 self.room_group_name, self.channel_name
             )
+
+    async def chat_previous_messages(self, event):
+        previous_messages = await self.send_previous_messages()
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "previous_messages": previous_messages,
+                }
+            )
+        )
 
     async def receive(self, text_data):
         message_text = text_data
@@ -100,12 +116,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
             for message in messages
         ]
-        self.send(text_data=json.dumps(message_list))
+        return message_list
 
     @database_sync_to_async
-    def get_user(self, user_id: int) -> User:
+    def get_user(self, user_id: int) -> User | None:
         """Fetch the user from the database."""
-        return User.objects.get(pk=user_id)
+        try:
+            return User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return None
 
     @database_sync_to_async
     def save_message(self, sender_id, recipient_id, text) -> Message:
